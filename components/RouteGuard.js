@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { isAuthenticated } from '@/lib/authenticate';
 import { useAtom } from 'jotai';
 import { favouritesAtom } from '@/store';
@@ -12,22 +12,7 @@ export default function RouteGuard(props) {
   const [authorized, setAuthorized] = useState(false);
   const [, setFavouritesList] = useAtom(favouritesAtom);
 
-  useEffect(() => {
-    async function updateAtom() {
-        setFavouritesList(await getFavourites());
-    }
-    updateAtom();
-
-    authCheck(router.pathname);
-
-    router.events.on('routeChangeComplete', authCheck);
-
-    return () => {
-      router.events.off('routeChangeComplete', authCheck);
-    };
-  }, []);
-
-  function authCheck(url) {
+  const authCheck = useCallback((url) => {
     const path = url.split('?')[0];
     if (!isAuthenticated() && !PUBLIC_PATHS.includes(path)) {
       setAuthorized(false);
@@ -35,7 +20,23 @@ export default function RouteGuard(props) {
     } else {
       setAuthorized(true);
     }
-  }
+  }, [router]);
+
+  useEffect(() => {
+    async function updateAtom() {
+      setFavouritesList(await getFavourites());
+    }
+    updateAtom();
+
+    authCheck(router.pathname);
+
+    const handleRouteChange = (url) => authCheck(url);
+    router.events.on('routeChangeComplete', handleRouteChange);
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+    };
+  }, [authCheck, router.events, router.pathname, setFavouritesList]);
 
   return <>{authorized && props.children}</>;
 }
