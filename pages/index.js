@@ -8,6 +8,9 @@
 *  
 *  Name: Song Nhat Nguyen ; Student ID: 169284239 ; Date: December 5th, 2025
 * 
+*  Vercel Deployment: https://web-422-a3-front-end-n2ux.vercel.app/
+*  
+*   
 ********************************************************************************/  
 
 import { useForm } from "react-hook-form";
