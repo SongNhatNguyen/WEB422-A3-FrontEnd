@@ -1,0 +1,25 @@
+import Layout from "@/components/Layout";
+import RouteGuard from "@/components/RouteGuard";
+import { SWRConfig } from "swr";
+import "@/styles/bootstrap.min.css";
+import "@/styles/globals.css";
+
+const fetcher = async (...args) => {
+  const response = await fetch(...args);
+  if (!response.ok) {
+    throw new Error(`Request failed with status: ${response.status}`);
+  }
+  return response.json();
+};
+
+export default function MyApp({ Component, pageProps }) {
+  return (
+    <SWRConfig value={{ fetcher }}>
+      <RouteGuard>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </RouteGuard>
+    </SWRConfig>
+  );
+}
